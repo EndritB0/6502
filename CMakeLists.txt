@@ -4,6 +4,8 @@ project(6502 VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE STRING "Available build types" FORCE)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+enable_testing()
+
 add_library(ProjectWarnings INTERFACE)
 
 if(MSVC)
@@ -13,4 +15,5 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(ProjectWarnings INTERFACE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
+add_subdirectory(vendor)
 include(projects.cmake)

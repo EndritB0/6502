@@ -1,0 +1,25 @@
+add_executable(6502Tests)
+
+set(TESTS_SOURCES
+    "src/pch.h"
+    "src/SmokeTests.cpp"
+)
+
+set(BASE_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+set_target_properties(6502Tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${BASE_OUTPUT_DIR}
+)
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "" FILES ${TESTS_SOURCES})
+source_group("Precompiled Headers" REGULAR_EXPRESSION ".*pch.*")
+
+target_sources(6502Tests PRIVATE ${TESTS_SOURCES})
+
+target_compile_features(6502Tests PRIVATE cxx_std_20)
+target_include_directories(6502Tests PRIVATE src)
+target_precompile_headers(6502Tests PRIVATE src/pch.h)
+
+target_link_libraries(6502Tests PRIVATE 6502 GTest::gtest_main ProjectWarnings)
+
+include(GoogleTest)
+gtest_discover_tests(6502Tests)
