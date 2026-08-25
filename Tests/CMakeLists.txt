@@ -2,7 +2,8 @@ add_executable(6502Tests)
 
 set(TESTS_SOURCES
     "src/pch.h"
-    "src/SmokeTests.cpp"
+    "src/CPUTests.cpp"
+    "src/MemoryTests.cpp"
 )
 
 set(BASE_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
