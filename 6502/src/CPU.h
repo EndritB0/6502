@@ -10,6 +10,12 @@ namespace MOS6502 {
 		static constexpr std::uint8_t LDA_IMMEDIATE{ 0xA9 };
 		static constexpr std::uint8_t LDA_ZERO_PAGE{ 0xA5 };
 		static constexpr std::uint8_t LDA_ZERO_PAGE_X{ 0xB5 };
+		static constexpr std::uint8_t LDA_ABSOLUTE{ 0xAD };
+		static constexpr std::uint8_t LDA_ABSOLUTE_X{ 0xBD };
+		static constexpr std::uint8_t LDA_ABSOLUTE_Y{ 0xB9 };
+		static constexpr std::uint8_t LDA_INDIRECT_X{ 0xA1 };
+		static constexpr std::uint8_t LDA_INDIRECT_Y{ 0xB1 };
+
 
 		static constexpr std::uint8_t JSR{ 0x20 };
 	}
@@ -43,6 +49,7 @@ namespace MOS6502 {
 		std::uint8_t FetchByte(std::uint32_t& cycles, Memory& memory);
 		std::uint16_t FetchWord(std::uint32_t& cycles, Memory& memory);
 		std::uint8_t ReadByte(std::uint32_t& cycles, Memory& memory, std::uint16_t address);
+		std::uint16_t ReadWord(std::uint32_t& cycles, Memory& memory, std::uint16_t address);
 		void Execute(std::uint32_t cycles, Memory& memory);
 	};
 

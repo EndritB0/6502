@@ -55,6 +55,13 @@ namespace MOS6502 {
 		return byte;
 	}
 
+	std::uint16_t CPU::ReadWord(std::uint32_t& cycles, Memory& memory, std::uint16_t address)
+	{
+		std::uint16_t word{ static_cast<std::uint16_t>(memory[address] | (memory[address + 1] << 8)) };
+		cycles -= 2;
+		return word;
+	}
+
 	void CPU::Execute(std::uint32_t cycles, Memory& memory)
 	{
 		while (cycles > 0)
@@ -84,6 +91,64 @@ namespace MOS6502 {
 					std::uint8_t zeroPageAddress{ static_cast<std::uint8_t>(FetchByte(cycles, memory) + XRegister) };
 					cycles--;
 					Accumulator = ReadByte(cycles, memory, zeroPageAddress);
+					LDASetStatus();
+					break;
+				}
+
+				case Opcode::LDA_ABSOLUTE:
+				{
+					std::uint16_t absoluteAddress{ FetchWord(cycles, memory) };
+					Accumulator = ReadByte(cycles, memory, absoluteAddress);
+					LDASetStatus();
+					break;
+				}
+
+				case Opcode::LDA_ABSOLUTE_X:
+				{
+					std::uint16_t absoluteAddress{ FetchWord(cycles, memory) };
+					std::uint16_t effectiveAddress{ static_cast<std::uint16_t>(absoluteAddress + XRegister) };
+					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
+					{
+						cycles--;
+					}
+					Accumulator = ReadByte(cycles, memory, effectiveAddress);
+					LDASetStatus();
+					break;
+				}
+
+				case Opcode::LDA_ABSOLUTE_Y:
+				{
+					std::uint16_t absoluteAddress{ FetchWord(cycles, memory) };
+					std::uint16_t effectiveAddress{ static_cast<std::uint16_t>(absoluteAddress + YRegister) };
+					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
+					{
+						cycles--;
+					}
+					Accumulator = ReadByte(cycles, memory, effectiveAddress);
+					LDASetStatus();
+					break;
+				}
+
+				case Opcode::LDA_INDIRECT_X:
+				{
+					std::uint8_t zeroPageAddress{ static_cast<std::uint8_t>(FetchByte(cycles, memory) + XRegister) };
+					cycles--;
+					std::uint16_t effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Accumulator = ReadByte(cycles, memory, effectiveAddress);
+					LDASetStatus();
+					break;
+				}
+
+				case Opcode::LDA_INDIRECT_Y:
+				{
+					std::uint8_t zeroPageAddress{ FetchByte(cycles, memory) };
+					std::uint16_t effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					std::uint16_t finalAddress{ static_cast<std::uint16_t>(effectiveAddress + YRegister) };
+					if ((effectiveAddress & 0xFF00) != (finalAddress & 0xFF00))
+					{
+						cycles--;
+					}
+					Accumulator = ReadByte(cycles, memory, finalAddress);
 					LDASetStatus();
 					break;
 				}
