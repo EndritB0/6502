@@ -8,6 +8,6 @@ namespace MOS6502 {
 	using Word = std::uint16_t;
 
 	using Address = Word;
-	using Cycles = std::uint32_t;
+	using Cycles = std::int32_t;
 
 }
