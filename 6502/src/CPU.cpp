@@ -62,6 +62,16 @@ namespace MOS6502 {
 		return word;
 	}
 
+	Address CPU::AddIndexed(Cycles& cycles, Address address, Byte offset)
+	{
+		Address effectiveAddress{ static_cast<Address>(address + offset) };
+		if ((address & 0xFF00) != (effectiveAddress & 0xFF00))
+		{
+			cycles--;
+		}
+		return effectiveAddress;
+	}
+
 	void CPU::Execute(Cycles cycles, Memory& memory)
 	{
 		while (cycles > 0)
@@ -106,11 +116,7 @@ namespace MOS6502 {
 				case Opcode::LDA_ABSOLUTE_X:
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
-					Address effectiveAddress{ static_cast<Address>(absoluteAddress + XRegister) };
-					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
-					{
-						cycles--;
-					}
+					Address effectiveAddress{ AddIndexed(cycles, absoluteAddress, XRegister) };
 					Accumulator = ReadByte(cycles, memory, effectiveAddress);
 					LoadRegisterSetStatus(Accumulator);
 					break;
@@ -119,11 +125,7 @@ namespace MOS6502 {
 				case Opcode::LDA_ABSOLUTE_Y:
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
-					Address effectiveAddress{ static_cast<Address>(absoluteAddress + YRegister) };
-					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
-					{
-						cycles--;
-					}
+					Address effectiveAddress{ AddIndexed(cycles, absoluteAddress, YRegister) };
 					Accumulator = ReadByte(cycles, memory, effectiveAddress);
 					LoadRegisterSetStatus(Accumulator);
 					break;
@@ -143,11 +145,7 @@ namespace MOS6502 {
 				{
 					Byte zeroPageAddress{ FetchByte(cycles, memory) };
 					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
-					Address finalAddress{ static_cast<Address>(effectiveAddress + YRegister) };
-					if ((effectiveAddress & 0xFF00) != (finalAddress & 0xFF00))
-					{
-						cycles--;
-					}
+					Address finalAddress{ AddIndexed(cycles, effectiveAddress, YRegister) };
 					Accumulator = ReadByte(cycles, memory, finalAddress);
 					LoadRegisterSetStatus(Accumulator);
 					break;
@@ -189,11 +187,7 @@ namespace MOS6502 {
 				case Opcode::LDX_ABSOLUTE_Y:
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
-					Address effectiveAddress{ static_cast<Address>(absoluteAddress + YRegister) };
-					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
-					{
-						cycles--;
-					}
+					Address effectiveAddress{ AddIndexed(cycles, absoluteAddress, YRegister) };
 					XRegister = ReadByte(cycles, memory, effectiveAddress);
 					LoadRegisterSetStatus(XRegister);
 					break;
