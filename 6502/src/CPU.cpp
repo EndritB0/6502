@@ -26,10 +26,10 @@ namespace MOS6502 {
 		ProcessorStatus = static_cast<Byte>(updated);
 	}
 
-	void CPU::LDASetStatus()
+	void CPU::LoadRegisterSetStatus(Byte registerValue)
 	{
-		SetFlag(Flag::Zero, Accumulator == 0);
-		SetFlag(Flag::Negative, (Accumulator & 0x80) != 0);
+		SetFlag(Flag::Zero, registerValue == 0);
+		SetFlag(Flag::Negative, (registerValue & 0x80) != 0);
 	}
 
 	Byte CPU::FetchByte(Cycles& cycles, Memory& memory)
@@ -74,7 +74,7 @@ namespace MOS6502 {
 				{
 					Byte value{ FetchByte(cycles, memory) };
 					Accumulator = value;
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
 					break;
 				}
 
@@ -82,7 +82,7 @@ namespace MOS6502 {
 				{
 					Byte zeroPageAddress{ FetchByte(cycles, memory) };
 					Accumulator = ReadByte(cycles, memory, zeroPageAddress);
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
 					break;
 				}
 
@@ -91,7 +91,7 @@ namespace MOS6502 {
 					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
 					cycles--;
 					Accumulator = ReadByte(cycles, memory, zeroPageAddress);
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
 					break;
 				}
 
@@ -99,7 +99,7 @@ namespace MOS6502 {
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
 					Accumulator = ReadByte(cycles, memory, absoluteAddress);
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
 					break;
 				}
 
@@ -112,7 +112,7 @@ namespace MOS6502 {
 						cycles--;
 					}
 					Accumulator = ReadByte(cycles, memory, effectiveAddress);
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
 					break;
 				}
 
@@ -125,7 +125,7 @@ namespace MOS6502 {
 						cycles--;
 					}
 					Accumulator = ReadByte(cycles, memory, effectiveAddress);
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
 					break;
 				}
 
@@ -135,7 +135,7 @@ namespace MOS6502 {
 					cycles--;
 					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
 					Accumulator = ReadByte(cycles, memory, effectiveAddress);
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
 					break;
 				}
 
@@ -149,7 +149,53 @@ namespace MOS6502 {
 						cycles--;
 					}
 					Accumulator = ReadByte(cycles, memory, finalAddress);
-					LDASetStatus();
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::LDX_IMMEDIATE:
+				{
+					Byte value{ FetchByte(cycles, memory) };
+					XRegister = value;
+					LoadRegisterSetStatus(XRegister);
+					break;
+				}
+
+				case Opcode::LDX_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					XRegister = ReadByte(cycles, memory, zeroPageAddress);
+					LoadRegisterSetStatus(XRegister);
+					break;
+				}
+
+				case Opcode::LDX_ZERO_PAGE_Y:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + YRegister) };
+					cycles--;
+					XRegister = ReadByte(cycles, memory, zeroPageAddress);
+					LoadRegisterSetStatus(XRegister);
+					break;
+				}
+
+				case Opcode::LDX_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					XRegister = ReadByte(cycles, memory, absoluteAddress);
+					LoadRegisterSetStatus(XRegister);
+					break;
+				}
+
+				case Opcode::LDX_ABSOLUTE_Y:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ static_cast<Address>(absoluteAddress + YRegister) };
+					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
+					{
+						cycles--;
+					}
+					XRegister = ReadByte(cycles, memory, effectiveAddress);
+					LoadRegisterSetStatus(XRegister);
 					break;
 				}
 

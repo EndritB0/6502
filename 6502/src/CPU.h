@@ -16,6 +16,12 @@ namespace MOS6502 {
 		static constexpr Byte LDA_INDIRECT_X{ 0xA1 };
 		static constexpr Byte LDA_INDIRECT_Y{ 0xB1 };
 
+		static constexpr Byte LDX_IMMEDIATE{ 0xA2 };
+		static constexpr Byte LDX_ZERO_PAGE{ 0xA6 };
+		static constexpr Byte LDX_ZERO_PAGE_Y{ 0xB6 };
+		static constexpr Byte LDX_ABSOLUTE{ 0xAE };
+		static constexpr Byte LDX_ABSOLUTE_Y{ 0xBE };
+
 		static constexpr Byte JSR{ 0x20 };
 	}
 
@@ -42,7 +48,7 @@ namespace MOS6502 {
 
 		bool GetFlag(Byte flag) const;
 		void SetFlag(Byte flag, bool value);
-		void LDASetStatus();
+		void LoadRegisterSetStatus(Byte registerValue);
 
 		void Reset(Memory& memory);
 		Byte FetchByte(Cycles& cycles, Memory& memory);
