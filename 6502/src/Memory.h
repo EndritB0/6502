@@ -1,18 +1,18 @@
 #pragma once
 
-#include <cstdint>
+#include "Types.h"
 
 namespace MOS6502 {
 
 	struct Memory {
 		static constexpr std::uint32_t MemorySize{ 1024 * 64 };
-		std::uint8_t Data[MemorySize];
+		Byte Data[MemorySize];
 
-		std::uint8_t& operator[](std::uint32_t address) { return Data[address]; }
-		std::uint8_t operator[](std::uint32_t address) const { return Data[address]; }
+		Byte& operator[](Address address) { return Data[address]; }
+		Byte operator[](Address address) const { return Data[address]; }
 
 		void Init();
-		void WriteWord(std::uint32_t& cycles, std::uint16_t value, std::uint16_t address);
+		void WriteWord(Cycles& cycles, Word value, Address address);
 	};
 
 }

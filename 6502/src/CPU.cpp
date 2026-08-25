@@ -15,15 +15,15 @@ namespace MOS6502 {
 		memory.Init();
 	}
 
-	bool CPU::GetFlag(std::uint8_t flag) const
+	bool CPU::GetFlag(Byte flag) const
 	{
 		return (ProcessorStatus & flag) != 0;
 	}
 
-	void CPU::SetFlag(std::uint8_t flag, bool value)
+	void CPU::SetFlag(Byte flag, bool value)
 	{
 		const int updated{ value ? (ProcessorStatus | flag) : (ProcessorStatus & ~flag) };
-		ProcessorStatus = static_cast<std::uint8_t>(updated);
+		ProcessorStatus = static_cast<Byte>(updated);
 	}
 
 	void CPU::LDASetStatus()
@@ -32,47 +32,47 @@ namespace MOS6502 {
 		SetFlag(Flag::Negative, (Accumulator & 0x80) != 0);
 	}
 
-	std::uint8_t CPU::FetchByte(std::uint32_t& cycles, Memory& memory)
+	Byte CPU::FetchByte(Cycles& cycles, Memory& memory)
 	{
-		std::uint8_t byte{ memory[ProgramCounter] };
+		Byte byte{ memory[ProgramCounter] };
 		ProgramCounter++;
 		cycles--;
 		return byte;
 	}
 
-	std::uint16_t CPU::FetchWord(std::uint32_t& cycles, Memory& memory)
+	Word CPU::FetchWord(Cycles& cycles, Memory& memory)
 	{
-		std::uint16_t word{ static_cast<std::uint16_t>(memory[ProgramCounter] | (memory[ProgramCounter + 1] << 8)) };
+		Word word{ static_cast<Word>(memory[ProgramCounter] | (memory[static_cast<Address>(ProgramCounter + 1)] << 8)) };
 		ProgramCounter += 2;
 		cycles -= 2;
 		return word;
 	}
 
-	std::uint8_t CPU::ReadByte(std::uint32_t& cycles, Memory& memory, std::uint16_t address)
+	Byte CPU::ReadByte(Cycles& cycles, Memory& memory, Address address)
 	{
-		std::uint8_t byte{ memory[address] };
+		Byte byte{ memory[address] };
 		cycles--;
 		return byte;
 	}
 
-	std::uint16_t CPU::ReadWord(std::uint32_t& cycles, Memory& memory, std::uint16_t address)
+	Word CPU::ReadWord(Cycles& cycles, Memory& memory, Address address)
 	{
-		std::uint16_t word{ static_cast<std::uint16_t>(memory[address] | (memory[address + 1] << 8)) };
+		Word word{ static_cast<Word>(memory[address] | (memory[static_cast<Address>(address + 1)] << 8)) };
 		cycles -= 2;
 		return word;
 	}
 
-	void CPU::Execute(std::uint32_t cycles, Memory& memory)
+	void CPU::Execute(Cycles cycles, Memory& memory)
 	{
 		while (cycles > 0)
 		{
-			std::uint8_t opcode{ FetchByte(cycles, memory) };
+			Byte opcode{ FetchByte(cycles, memory) };
 
 			switch (opcode)
 			{
 				case Opcode::LDA_IMMEDIATE:
 				{
-					std::uint8_t value{ FetchByte(cycles, memory) };
+					Byte value{ FetchByte(cycles, memory) };
 					Accumulator = value;
 					LDASetStatus();
 					break;
@@ -80,7 +80,7 @@ namespace MOS6502 {
 
 				case Opcode::LDA_ZERO_PAGE:
 				{
-					std::uint8_t zeroPageAddress{ FetchByte(cycles, memory) };
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
 					Accumulator = ReadByte(cycles, memory, zeroPageAddress);
 					LDASetStatus();
 					break;
@@ -88,7 +88,7 @@ namespace MOS6502 {
 
 				case Opcode::LDA_ZERO_PAGE_X:
 				{
-					std::uint8_t zeroPageAddress{ static_cast<std::uint8_t>(FetchByte(cycles, memory) + XRegister) };
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
 					cycles--;
 					Accumulator = ReadByte(cycles, memory, zeroPageAddress);
 					LDASetStatus();
@@ -97,7 +97,7 @@ namespace MOS6502 {
 
 				case Opcode::LDA_ABSOLUTE:
 				{
-					std::uint16_t absoluteAddress{ FetchWord(cycles, memory) };
+					Address absoluteAddress{ FetchWord(cycles, memory) };
 					Accumulator = ReadByte(cycles, memory, absoluteAddress);
 					LDASetStatus();
 					break;
@@ -105,8 +105,8 @@ namespace MOS6502 {
 
 				case Opcode::LDA_ABSOLUTE_X:
 				{
-					std::uint16_t absoluteAddress{ FetchWord(cycles, memory) };
-					std::uint16_t effectiveAddress{ static_cast<std::uint16_t>(absoluteAddress + XRegister) };
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ static_cast<Address>(absoluteAddress + XRegister) };
 					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
 					{
 						cycles--;
@@ -118,8 +118,8 @@ namespace MOS6502 {
 
 				case Opcode::LDA_ABSOLUTE_Y:
 				{
-					std::uint16_t absoluteAddress{ FetchWord(cycles, memory) };
-					std::uint16_t effectiveAddress{ static_cast<std::uint16_t>(absoluteAddress + YRegister) };
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ static_cast<Address>(absoluteAddress + YRegister) };
 					if ((absoluteAddress & 0xFF00) != (effectiveAddress & 0xFF00))
 					{
 						cycles--;
@@ -131,9 +131,9 @@ namespace MOS6502 {
 
 				case Opcode::LDA_INDIRECT_X:
 				{
-					std::uint8_t zeroPageAddress{ static_cast<std::uint8_t>(FetchByte(cycles, memory) + XRegister) };
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
 					cycles--;
-					std::uint16_t effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
 					Accumulator = ReadByte(cycles, memory, effectiveAddress);
 					LDASetStatus();
 					break;
@@ -141,9 +141,9 @@ namespace MOS6502 {
 
 				case Opcode::LDA_INDIRECT_Y:
 				{
-					std::uint8_t zeroPageAddress{ FetchByte(cycles, memory) };
-					std::uint16_t effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
-					std::uint16_t finalAddress{ static_cast<std::uint16_t>(effectiveAddress + YRegister) };
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Address finalAddress{ static_cast<Address>(effectiveAddress + YRegister) };
 					if ((effectiveAddress & 0xFF00) != (finalAddress & 0xFF00))
 					{
 						cycles--;
@@ -155,8 +155,8 @@ namespace MOS6502 {
 
 				case Opcode::JSR:
 				{
-					std::uint16_t subroutineAddress{ FetchWord(cycles, memory) };
-					memory.WriteWord(cycles, ProgramCounter - 1, StackPointer);
+					Address subroutineAddress{ FetchWord(cycles, memory) };
+					memory.WriteWord(cycles, static_cast<Word>(ProgramCounter - 1), StackPointer);
 					ProgramCounter = subroutineAddress;
 					StackPointer += 2;
 					cycles--;

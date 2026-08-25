@@ -1,55 +1,55 @@
 #pragma once
 
-#include <cstdint>
+#include "Types.h"
 
 #include "Memory.h"
 
 namespace MOS6502 {
 
 	namespace Opcode {
-		static constexpr std::uint8_t LDA_IMMEDIATE{ 0xA9 };
-		static constexpr std::uint8_t LDA_ZERO_PAGE{ 0xA5 };
-		static constexpr std::uint8_t LDA_ZERO_PAGE_X{ 0xB5 };
-		static constexpr std::uint8_t LDA_ABSOLUTE{ 0xAD };
-		static constexpr std::uint8_t LDA_ABSOLUTE_X{ 0xBD };
-		static constexpr std::uint8_t LDA_ABSOLUTE_Y{ 0xB9 };
-		static constexpr std::uint8_t LDA_INDIRECT_X{ 0xA1 };
-		static constexpr std::uint8_t LDA_INDIRECT_Y{ 0xB1 };
+		static constexpr Byte LDA_IMMEDIATE{ 0xA9 };
+		static constexpr Byte LDA_ZERO_PAGE{ 0xA5 };
+		static constexpr Byte LDA_ZERO_PAGE_X{ 0xB5 };
+		static constexpr Byte LDA_ABSOLUTE{ 0xAD };
+		static constexpr Byte LDA_ABSOLUTE_X{ 0xBD };
+		static constexpr Byte LDA_ABSOLUTE_Y{ 0xB9 };
+		static constexpr Byte LDA_INDIRECT_X{ 0xA1 };
+		static constexpr Byte LDA_INDIRECT_Y{ 0xB1 };
 
-		static constexpr std::uint8_t JSR{ 0x20 };
+		static constexpr Byte JSR{ 0x20 };
 	}
 
 	namespace Flag {
 
-		static constexpr std::uint8_t Carry{ 1 << 0 };
-		static constexpr std::uint8_t Zero{ 1 << 1 };
-		static constexpr std::uint8_t InterruptDisable{ 1 << 2 };
-		static constexpr std::uint8_t Decimal{ 1 << 3 };
-		static constexpr std::uint8_t Break{ 1 << 4 };
-		static constexpr std::uint8_t Unused{ 1 << 5 };
-		static constexpr std::uint8_t Overflow{ 1 << 6 };
-		static constexpr std::uint8_t Negative{ 1 << 7 };
+		static constexpr Byte Carry{ 1 << 0 };
+		static constexpr Byte Zero{ 1 << 1 };
+		static constexpr Byte InterruptDisable{ 1 << 2 };
+		static constexpr Byte Decimal{ 1 << 3 };
+		static constexpr Byte Break{ 1 << 4 };
+		static constexpr Byte Unused{ 1 << 5 };
+		static constexpr Byte Overflow{ 1 << 6 };
+		static constexpr Byte Negative{ 1 << 7 };
 
 	}
 
 	struct CPU {
-		std::uint16_t ProgramCounter;
-		std::uint16_t StackPointer;
-		std::uint8_t Accumulator;
-		std::uint8_t XRegister;
-		std::uint8_t YRegister;
-		std::uint8_t ProcessorStatus;
+		Word ProgramCounter;
+		Word StackPointer;
+		Byte Accumulator;
+		Byte XRegister;
+		Byte YRegister;
+		Byte ProcessorStatus;
 
-		bool GetFlag(std::uint8_t flag) const;
-		void SetFlag(std::uint8_t flag, bool value);
+		bool GetFlag(Byte flag) const;
+		void SetFlag(Byte flag, bool value);
 		void LDASetStatus();
 
 		void Reset(Memory& memory);
-		std::uint8_t FetchByte(std::uint32_t& cycles, Memory& memory);
-		std::uint16_t FetchWord(std::uint32_t& cycles, Memory& memory);
-		std::uint8_t ReadByte(std::uint32_t& cycles, Memory& memory, std::uint16_t address);
-		std::uint16_t ReadWord(std::uint32_t& cycles, Memory& memory, std::uint16_t address);
-		void Execute(std::uint32_t cycles, Memory& memory);
+		Byte FetchByte(Cycles& cycles, Memory& memory);
+		Word FetchWord(Cycles& cycles, Memory& memory);
+		Byte ReadByte(Cycles& cycles, Memory& memory, Address address);
+		Word ReadWord(Cycles& cycles, Memory& memory, Address address);
+		void Execute(Cycles cycles, Memory& memory);
 	};
 
 }

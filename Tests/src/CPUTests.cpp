@@ -2,19 +2,22 @@
 
 #include <CPU.h>
 
-#include <cstdint>
-#include <initializer_list>
-
 namespace Test6502 {
 
 	using MOS6502::CPU;
 	using MOS6502::Memory;
+
+	using MOS6502::Address;
+	using MOS6502::Byte;
+	using MOS6502::Cycles;
+	using MOS6502::Word;
+
 	namespace Flag = MOS6502::Flag;
 	namespace Opcode = MOS6502::Opcode;
 
-	constexpr std::uint16_t ResetVector{ 0xFFFC };
-	constexpr std::uint16_t InitialStackPointer{ 0x0100 };
-	constexpr std::uint8_t UnrelatedFlags{ Flag::Carry | Flag::InterruptDisable | Flag::Decimal | Flag::Overflow };
+	constexpr Address ResetVector{ 0xFFFC };
+	constexpr Word InitialStackPointer{ 0x0100 };
+	constexpr Byte UnrelatedFlags{ Flag::Carry | Flag::InterruptDisable | Flag::Decimal | Flag::Overflow };
 
 	class CPUTest : public ::testing::Test {
 	protected:
@@ -23,10 +26,10 @@ namespace Test6502 {
 			cpu.Reset(memory);
 		}
 
-		void WriteProgram(std::initializer_list<std::uint8_t> bytes)
+		void WriteProgram(std::initializer_list<Byte> bytes)
 		{
-			std::uint16_t address{ ResetVector };
-			for (const std::uint8_t byte : bytes)
+			Address address{ ResetVector };
+			for (const Byte byte : bytes)
 			{
 				memory[address] = byte;
 				address++;

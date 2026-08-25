@@ -2,12 +2,13 @@
 
 #include <CPU.h>
 
-#include <cstdint>
-
 namespace Test6502 {
 
 	using MOS6502::CPU;
 	using MOS6502::Memory;
+	using MOS6502::Address;
+	using MOS6502::Byte;
+	using MOS6502::Cycles;
 
 	class MemoryTest : public ::testing::Test {
 	protected:
@@ -20,7 +21,7 @@ namespace Test6502 {
 		{
 			for (std::uint32_t address{}; address < Memory::MemorySize; address++)
 			{
-				memory[address] = static_cast<std::uint8_t>((address % 255) + 1);
+				memory[static_cast<Address>(address)] = static_cast<Byte>((address % 255) + 1);
 			}
 		}
 
@@ -29,7 +30,7 @@ namespace Test6502 {
 			std::uint32_t nonZeroBytes{ 0 };
 			for (std::uint32_t address{}; address < Memory::MemorySize; address++)
 			{
-				if (memory[address] != 0x00)
+				if (memory[static_cast<Address>(address)] != 0x00)
 				{
 					nonZeroBytes++;
 				}
@@ -123,7 +124,7 @@ namespace Test6502 {
 
 	TEST_F(MemoryWriteWordTest, WritesTheLowByteFirst)
 	{
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		memory.WriteWord(cycles, 0xABCD, 0x1234);
 
@@ -133,7 +134,7 @@ namespace Test6502 {
 
 	TEST_F(MemoryWriteWordTest, ConsumesTwoCycles)
 	{
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		memory.WriteWord(cycles, 0xABCD, 0x1234);
 
@@ -144,7 +145,7 @@ namespace Test6502 {
 	{
 		memory[0x1233] = 0x11;
 		memory[0x1236] = 0x22;
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		memory.WriteWord(cycles, 0xABCD, 0x1234);
 
@@ -154,7 +155,7 @@ namespace Test6502 {
 
 	TEST_F(MemoryWriteWordTest, WritesEveryBitOfTheValue)
 	{
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		memory.WriteWord(cycles, 0xFFFF, 0x1234);
 
@@ -166,7 +167,7 @@ namespace Test6502 {
 	{
 		memory[0x1234] = 0xAA;
 		memory[0x1235] = 0xBB;
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		memory.WriteWord(cycles, 0x0000, 0x1234);
 
@@ -191,7 +192,7 @@ namespace Test6502 {
 	{
 		cpu.ProgramCounter = 0x1234;
 		memory[0x1234] = 0x42;
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		EXPECT_EQ(cpu.FetchByte(cycles, memory), 0x42);
 		EXPECT_EQ(cpu.ProgramCounter, 0x1235);
@@ -203,7 +204,7 @@ namespace Test6502 {
 		cpu.ProgramCounter = 0x1234;
 		memory[0x1234] = 0xCD;
 		memory[0x1235] = 0xAB;
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		EXPECT_EQ(cpu.FetchWord(cycles, memory), 0xABCD);
 		EXPECT_EQ(cpu.ProgramCounter, 0x1236);
@@ -214,7 +215,7 @@ namespace Test6502 {
 	{
 		cpu.ProgramCounter = 0x1234;
 		memory[0x4242] = 0x37;
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		EXPECT_EQ(cpu.ReadByte(cycles, memory, 0x4242), 0x37);
 		EXPECT_EQ(cpu.ProgramCounter, 0x1234);
@@ -225,7 +226,7 @@ namespace Test6502 {
 	{
 		memory[0x0000] = 0x42;
 		memory[0xFFFF] = 0x37;
-		std::uint32_t cycles{ 10 };
+		Cycles cycles{ 10 };
 
 		EXPECT_EQ(cpu.ReadByte(cycles, memory, 0x0000), 0x42);
 		EXPECT_EQ(cpu.ReadByte(cycles, memory, 0xFFFF), 0x37);

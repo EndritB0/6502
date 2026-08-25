@@ -6,6 +6,7 @@ set(6502_SOURCES
     "src/CPU.cpp"
     "src/Memory.h"
     "src/Memory.cpp"
+    "src/Types.h"
 )
 
 set(BASE_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
