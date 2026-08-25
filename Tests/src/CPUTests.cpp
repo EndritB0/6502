@@ -40,6 +40,11 @@ namespace Test6502 {
 	class OpcodeLDAImmediateTest : public CPUTest {};
 	class OpcodeLDAZeroPageTest : public CPUTest {};
 	class OpcodeLDAZeroPageXTest : public CPUTest {};
+	class OpcodeLDAAbsoluteTest : public CPUTest {};
+	class OpcodeLDAAbsoluteXTest : public CPUTest {};
+	class OpcodeLDAAbsoluteYTest : public CPUTest {};
+	class OpcodeLDAIndirectXTest : public CPUTest {};
+	class OpcodeLDAIndirectYTest : public CPUTest {};
 	class OpcodeJSRTest : public CPUTest {};
 
 	TEST_F(OpcodeLDAImmediateTest, LoadsTheOperandIntoTheAccumulator)
@@ -223,6 +228,400 @@ namespace Test6502 {
 		memory[0x0047] = 0x80;
 
 		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x80);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Negative));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Zero));
+	}
+
+	TEST_F(OpcodeLDAAbsoluteTest, LoadsTheValueHeldAtTheAbsoluteAddress)
+	{
+		WriteProgram({ Opcode::LDA_ABSOLUTE, 0x80, 0x44 });
+		memory[0x4480] = 0x37;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteTest, ReadsTheAddressOperandLittleEndian)
+	{
+		WriteProgram({ Opcode::LDA_ABSOLUTE, 0x34, 0x12 });
+		memory[0x1234] = 0x37;
+		memory[0x3412] = 0x99;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteTest, ConsumesFourCycles)
+	{
+		WriteProgram({ Opcode::LDA_ABSOLUTE, 0x80, 0x44, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x4480] = 0x37;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteTest, SetsTheZeroFlagWhenTheLoadedValueIsZero)
+	{
+		cpu.Accumulator = 0x42;
+		WriteProgram({ Opcode::LDA_ABSOLUTE, 0x80, 0x44 });
+		memory[0x4480] = 0x00;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x00);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Zero));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Negative));
+	}
+
+	TEST_F(OpcodeLDAAbsoluteTest, SetsTheNegativeFlagWhenBitSevenIsSet)
+	{
+		WriteProgram({ Opcode::LDA_ABSOLUTE, 0x80, 0x44 });
+		memory[0x4480] = 0x80;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x80);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Negative));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Zero));
+	}
+
+	TEST_F(OpcodeLDAAbsoluteXTest, AddsTheXRegisterToTheAbsoluteAddress)
+	{
+		cpu.XRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_X, 0x80, 0x44 });
+		memory[0x4485] = 0x37;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteXTest, CarriesTheSumIntoTheNextPage)
+	{
+		cpu.XRegister = 0xFF;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_X, 0x02, 0x44 });
+		memory[0x4501] = 0x37;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteXTest, ConsumesFourCyclesWhenNoPageIsCrossed)
+	{
+		cpu.XRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_X, 0x80, 0x44, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x4485] = 0x37;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteXTest, ConsumesFiveCyclesWhenAPageIsCrossed)
+	{
+		cpu.XRegister = 0xFF;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_X, 0x02, 0x44, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x4501] = 0x37;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteXTest, SetsTheZeroFlagWhenTheLoadedValueIsZero)
+	{
+		cpu.Accumulator = 0x42;
+		cpu.XRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_X, 0x80, 0x44 });
+		memory[0x4485] = 0x00;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x00);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Zero));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Negative));
+	}
+
+	TEST_F(OpcodeLDAAbsoluteXTest, SetsTheNegativeFlagWhenBitSevenIsSet)
+	{
+		cpu.XRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_X, 0x80, 0x44 });
+		memory[0x4485] = 0x80;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x80);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Negative));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Zero));
+	}
+
+	TEST_F(OpcodeLDAAbsoluteYTest, AddsTheYRegisterToTheAbsoluteAddress)
+	{
+		cpu.YRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_Y, 0x80, 0x44 });
+		memory[0x4485] = 0x37;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteYTest, CarriesTheSumIntoTheNextPage)
+	{
+		cpu.YRegister = 0xFF;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_Y, 0x02, 0x44 });
+		memory[0x4501] = 0x37;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteYTest, ConsumesFourCyclesWhenNoPageIsCrossed)
+	{
+		cpu.YRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_Y, 0x80, 0x44, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x4485] = 0x37;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteYTest, ConsumesFiveCyclesWhenAPageIsCrossed)
+	{
+		cpu.YRegister = 0xFF;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_Y, 0x02, 0x44, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x4501] = 0x37;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
+	}
+
+	TEST_F(OpcodeLDAAbsoluteYTest, SetsTheZeroFlagWhenTheLoadedValueIsZero)
+	{
+		cpu.Accumulator = 0x42;
+		cpu.YRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_Y, 0x80, 0x44 });
+		memory[0x4485] = 0x00;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x00);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Zero));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Negative));
+	}
+
+	TEST_F(OpcodeLDAAbsoluteYTest, SetsTheNegativeFlagWhenBitSevenIsSet)
+	{
+		cpu.YRegister = 0x05;
+		WriteProgram({ Opcode::LDA_ABSOLUTE_Y, 0x80, 0x44 });
+		memory[0x4485] = 0x80;
+
+		cpu.Execute(4, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x80);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Negative));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Zero));
+	}
+
+	TEST_F(OpcodeLDAIndirectXTest, ReadsThePointerHeldAtTheZeroPageAddressOffsetByX)
+	{
+		cpu.XRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_X, 0x02 });
+		memory[0x0006] = 0x00;
+		memory[0x0007] = 0x80;
+		memory[0x8000] = 0x37;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 2);
+	}
+
+	TEST_F(OpcodeLDAIndirectXTest, ReadsThePointerLittleEndian)
+	{
+		cpu.XRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_X, 0x02 });
+		memory[0x0006] = 0x34;
+		memory[0x0007] = 0x12;
+		memory[0x1234] = 0x37;
+		memory[0x3412] = 0x99;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAIndirectXTest, WrapsTheSumBackIntoTheZeroPage)
+	{
+		cpu.XRegister = 0x03;
+		WriteProgram({ Opcode::LDA_INDIRECT_X, 0xFE });
+		memory[0x0001] = 0x00;
+		memory[0x0002] = 0x80;
+		memory[0x8000] = 0x37;
+		memory[0x0101] = 0x00;
+		memory[0x0102] = 0x90;
+		memory[0x9000] = 0x99;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAIndirectXTest, ConsumesSixCycles)
+	{
+		cpu.XRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_X, 0x02, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x0006] = 0x00;
+		memory[0x0007] = 0x80;
+		memory[0x8000] = 0x37;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 2);
+	}
+
+	TEST_F(OpcodeLDAIndirectXTest, SetsTheZeroFlagWhenTheLoadedValueIsZero)
+	{
+		cpu.Accumulator = 0x42;
+		cpu.XRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_X, 0x02 });
+		memory[0x0006] = 0x00;
+		memory[0x0007] = 0x80;
+		memory[0x8000] = 0x00;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x00);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Zero));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Negative));
+	}
+
+	TEST_F(OpcodeLDAIndirectXTest, SetsTheNegativeFlagWhenBitSevenIsSet)
+	{
+		cpu.XRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_X, 0x02 });
+		memory[0x0006] = 0x00;
+		memory[0x0007] = 0x80;
+		memory[0x8000] = 0x80;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x80);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Negative));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Zero));
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, AddsTheYRegisterToThePointerHeldAtTheZeroPageAddress)
+	{
+		cpu.YRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0x02 });
+		memory[0x0002] = 0x00;
+		memory[0x0003] = 0x80;
+		memory[0x8004] = 0x37;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 2);
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, ReadsThePointerLittleEndian)
+	{
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0x02 });
+		memory[0x0002] = 0x34;
+		memory[0x0003] = 0x12;
+		memory[0x1234] = 0x37;
+		memory[0x3412] = 0x99;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, CarriesTheSumIntoTheNextPage)
+	{
+		cpu.YRegister = 0x01;
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0x02 });
+		memory[0x0002] = 0xFF;
+		memory[0x0003] = 0x80;
+		memory[0x8100] = 0x37;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, ConsumesFiveCyclesWhenNoPageIsCrossed)
+	{
+		cpu.YRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0x02, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x0002] = 0x00;
+		memory[0x0003] = 0x80;
+		memory[0x8004] = 0x37;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 2);
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, ConsumesSixCyclesWhenAPageIsCrossed)
+	{
+		cpu.YRegister = 0x01;
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0x02, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x0002] = 0xFF;
+		memory[0x0003] = 0x80;
+		memory[0x8100] = 0x37;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 2);
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, SetsTheZeroFlagWhenTheLoadedValueIsZero)
+	{
+		cpu.Accumulator = 0x42;
+		cpu.YRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0x02 });
+		memory[0x0002] = 0x00;
+		memory[0x0003] = 0x80;
+		memory[0x8004] = 0x00;
+
+		cpu.Execute(5, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x00);
+		EXPECT_TRUE(cpu.GetFlag(Flag::Zero));
+		EXPECT_FALSE(cpu.GetFlag(Flag::Negative));
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, SetsTheNegativeFlagWhenBitSevenIsSet)
+	{
+		cpu.YRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0x02 });
+		memory[0x0002] = 0x00;
+		memory[0x0003] = 0x80;
+		memory[0x8004] = 0x80;
+
+		cpu.Execute(5, memory);
 
 		EXPECT_EQ(cpu.Accumulator, 0x80);
 		EXPECT_TRUE(cpu.GetFlag(Flag::Negative));

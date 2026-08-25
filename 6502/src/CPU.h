@@ -16,7 +16,6 @@ namespace MOS6502 {
 		static constexpr std::uint8_t LDA_INDIRECT_X{ 0xA1 };
 		static constexpr std::uint8_t LDA_INDIRECT_Y{ 0xB1 };
 
-
 		static constexpr std::uint8_t JSR{ 0x20 };
 	}
 
