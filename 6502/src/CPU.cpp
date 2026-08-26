@@ -193,6 +193,48 @@ namespace MOS6502 {
 					break;
 				}
 
+				case Opcode::LDY_IMMEDIATE:
+				{
+					Byte value{ FetchByte(cycles, memory) };
+					YRegister = value;
+					LoadRegisterSetStatus(YRegister);
+					break;
+				}
+
+				case Opcode::LDY_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					YRegister = ReadByte(cycles, memory, zeroPageAddress);
+					LoadRegisterSetStatus(YRegister);
+					break;
+				}
+
+				case Opcode::LDY_ZERO_PAGE_X:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
+					cycles--;
+					YRegister = ReadByte(cycles, memory, zeroPageAddress);
+					LoadRegisterSetStatus(YRegister);
+					break;
+				}
+
+				case Opcode::LDY_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					YRegister = ReadByte(cycles, memory, absoluteAddress);
+					LoadRegisterSetStatus(YRegister);
+					break;
+				}
+
+				case Opcode::LDY_ABSOLUTE_X:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ AddIndexed(cycles, absoluteAddress, XRegister) };
+					YRegister = ReadByte(cycles, memory, effectiveAddress);
+					LoadRegisterSetStatus(YRegister);
+					break;
+				}
+
 				case Opcode::JSR:
 				{
 					Address subroutineAddress{ FetchWord(cycles, memory) };

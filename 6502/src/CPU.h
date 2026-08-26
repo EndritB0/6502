@@ -22,6 +22,12 @@ namespace MOS6502 {
 		static constexpr Byte LDX_ABSOLUTE{ 0xAE };
 		static constexpr Byte LDX_ABSOLUTE_Y{ 0xBE };
 
+		static constexpr Byte LDY_IMMEDIATE{ 0xA0 };
+		static constexpr Byte LDY_ZERO_PAGE{ 0xA4 };
+		static constexpr Byte LDY_ZERO_PAGE_X{ 0xB4 };
+		static constexpr Byte LDY_ABSOLUTE{ 0xAC };
+		static constexpr Byte LDY_ABSOLUTE_X{ 0xBC };
+
 		static constexpr Byte JSR{ 0x20 };
 	}
 
