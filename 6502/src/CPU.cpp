@@ -62,6 +62,12 @@ namespace MOS6502 {
 		return word;
 	}
 
+	void CPU::WriteByte(Cycles& cycles, Memory& memory, Address address, Byte value)
+	{
+		memory[address] = value;
+		cycles--;
+	}
+
 	Address CPU::AddIndexed(Cycles& cycles, Address address, Byte offset)
 	{
 		Address effectiveAddress{ static_cast<Address>(address + offset) };
@@ -238,24 +244,22 @@ namespace MOS6502 {
 				case Opcode::STA_ZERO_PAGE:
 				{
 					Byte zeroPageAddress{ FetchByte(cycles, memory) };
-					memory[zeroPageAddress] = Accumulator;
-					cycles--;
+					WriteByte(cycles, memory, zeroPageAddress, Accumulator);
 					break;
 				}
 
 				case Opcode::STA_ZERO_PAGE_X:
 				{
 					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
-					memory[zeroPageAddress] = Accumulator;
-					cycles -= 2;
+					cycles--;
+					WriteByte(cycles, memory, zeroPageAddress, Accumulator);
 					break;
 				}
 
 				case Opcode::STA_ABSOLUTE:
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
-					memory[absoluteAddress] = Accumulator;
-					cycles--;
+					WriteByte(cycles, memory, absoluteAddress, Accumulator);
 					break;
 				}
 
@@ -263,8 +267,8 @@ namespace MOS6502 {
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
 					Address effectiveAddress{ static_cast<Address>(absoluteAddress + XRegister) };
-					memory[effectiveAddress] = Accumulator;
-					cycles -= 2;
+					cycles--;
+					WriteByte(cycles, memory, effectiveAddress, Accumulator);
 					break;
 				}
 
@@ -272,8 +276,8 @@ namespace MOS6502 {
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
 					Address effectiveAddress{ static_cast<Address>(absoluteAddress + YRegister) };
-					memory[effectiveAddress] = Accumulator;
-					cycles -= 2;
+					cycles--;
+					WriteByte(cycles, memory, effectiveAddress, Accumulator);
 					break;
 				}
 
@@ -282,8 +286,7 @@ namespace MOS6502 {
 					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
 					cycles--;
 					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
-					memory[effectiveAddress] = Accumulator;
-					cycles--;
+					WriteByte(cycles, memory, effectiveAddress, Accumulator);
 					break;
 				}
 
@@ -292,8 +295,8 @@ namespace MOS6502 {
 					Byte zeroPageAddress{ FetchByte(cycles, memory) };
 					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
 					Address finalAddress{ static_cast<Address>(effectiveAddress + YRegister) };
-					memory[finalAddress] = Accumulator;
-					cycles -= 2;
+					cycles--;
+					WriteByte(cycles, memory, finalAddress, Accumulator);
 					break;
 				}
 

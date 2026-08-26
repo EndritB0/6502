@@ -69,6 +69,7 @@ namespace MOS6502 {
 		Word FetchWord(Cycles& cycles, Memory& memory);
 		Byte ReadByte(Cycles& cycles, Memory& memory, Address address);
 		Word ReadWord(Cycles& cycles, Memory& memory, Address address);
+		void WriteByte(Cycles& cycles, Memory& memory, Address address, Byte value);
 		Address AddIndexed(Cycles& cycles, Address address, Byte offset);
 		void Execute(Cycles cycles, Memory& memory);
 	};
