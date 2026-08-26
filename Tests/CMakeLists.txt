@@ -2,7 +2,11 @@ add_executable(6502Tests)
 
 set(TESTS_SOURCES
     "src/pch.h"
-    "src/CPUTests.cpp"
+    "src/CPU/CPUTests.h"
+    "src/CPU/LDATest.cpp"
+    "src/CPU/LDXTest.cpp"
+    "src/CPU/LDYTest.cpp"
+    "src/CPU/JSRTest.cpp"
     "src/MemoryTests.cpp"
 )
 
