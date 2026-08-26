@@ -300,6 +300,50 @@ namespace MOS6502 {
 					break;
 				}
 
+				case Opcode::STX_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					WriteByte(cycles, memory, zeroPageAddress, XRegister);
+					break;
+				}
+
+				case Opcode::STX_ZERO_PAGE_Y:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + YRegister) };
+					cycles--;
+					WriteByte(cycles, memory, zeroPageAddress, XRegister);
+					break;
+				}
+
+				case Opcode::STX_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					WriteByte(cycles, memory, absoluteAddress, XRegister);
+					break;
+				}
+
+				case Opcode::STY_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					WriteByte(cycles, memory, zeroPageAddress, YRegister);
+					break;
+				}
+
+				case Opcode::STY_ZERO_PAGE_X:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
+					cycles--;
+					WriteByte(cycles, memory, zeroPageAddress, YRegister);
+					break;
+				}
+
+				case Opcode::STY_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					WriteByte(cycles, memory, absoluteAddress, YRegister);
+					break;
+				}
+
 				case Opcode::JSR:
 				{
 					Address subroutineAddress{ FetchWord(cycles, memory) };

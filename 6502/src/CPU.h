@@ -36,6 +36,14 @@ namespace MOS6502 {
 		static constexpr Byte STA_INDIRECT_X{ 0x81 };
 		static constexpr Byte STA_INDIRECT_Y{ 0x91 };
 
+		static constexpr Byte STX_ZERO_PAGE{ 0x86 };
+		static constexpr Byte STX_ZERO_PAGE_Y{ 0x96 };
+		static constexpr Byte STX_ABSOLUTE{ 0x8E };
+
+		static constexpr Byte STY_ZERO_PAGE{ 0x84 };
+		static constexpr Byte STY_ZERO_PAGE_X{ 0x94 };
+		static constexpr Byte STY_ABSOLUTE{ 0x8C };
+
 		static constexpr Byte JSR{ 0x20 };
 	}
 
