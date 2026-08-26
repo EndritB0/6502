@@ -6,6 +6,7 @@ set(TESTS_SOURCES
     "src/CPU/LDATest.cpp"
     "src/CPU/LDXTest.cpp"
     "src/CPU/LDYTest.cpp"
+    "src/CPU/STATest.cpp"
     "src/CPU/JSRTest.cpp"
     "src/MemoryTests.cpp"
 )

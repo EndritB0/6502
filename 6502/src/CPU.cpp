@@ -235,6 +235,68 @@ namespace MOS6502 {
 					break;
 				}
 
+				case Opcode::STA_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					memory[zeroPageAddress] = Accumulator;
+					cycles--;
+					break;
+				}
+
+				case Opcode::STA_ZERO_PAGE_X:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
+					memory[zeroPageAddress] = Accumulator;
+					cycles -= 2;
+					break;
+				}
+
+				case Opcode::STA_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					memory[absoluteAddress] = Accumulator;
+					cycles--;
+					break;
+				}
+
+				case Opcode::STA_ABSOLUTE_X:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ static_cast<Address>(absoluteAddress + XRegister) };
+					memory[effectiveAddress] = Accumulator;
+					cycles -= 2;
+					break;
+				}
+
+				case Opcode::STA_ABSOLUTE_Y:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ static_cast<Address>(absoluteAddress + YRegister) };
+					memory[effectiveAddress] = Accumulator;
+					cycles -= 2;
+					break;
+				}
+
+				case Opcode::STA_INDIRECT_X:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
+					cycles--;
+					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					memory[effectiveAddress] = Accumulator;
+					cycles--;
+					break;
+				}
+
+				case Opcode::STA_INDIRECT_Y:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Address finalAddress{ static_cast<Address>(effectiveAddress + YRegister) };
+					memory[finalAddress] = Accumulator;
+					cycles -= 2;
+					break;
+				}
+
 				case Opcode::JSR:
 				{
 					Address subroutineAddress{ FetchWord(cycles, memory) };
