@@ -41,8 +41,6 @@ namespace Test6502 {
 		Memory memory;
 	};
 
-	class MemoryWriteWordTest : public MemoryTest {};
-
 	class CPUMemoryAccessTest : public ::testing::Test {
 	protected:
 		void SetUp() override
@@ -53,6 +51,8 @@ namespace Test6502 {
 		CPU cpu;
 		Memory memory;
 	};
+
+	class CPUWriteWordTest : public CPUMemoryAccessTest {};
 
 	TEST(MemoryLayoutTest, MemoryIsSixtyFourKilobytes)
 	{
@@ -122,59 +122,6 @@ namespace Test6502 {
 		EXPECT_EQ(CountNonZeroBytes(), Memory::MemorySize);
 	}
 
-	TEST_F(MemoryWriteWordTest, WritesTheLowByteFirst)
-	{
-		Cycles cycles{ 10 };
-
-		memory.WriteWord(cycles, 0xABCD, 0x1234);
-
-		EXPECT_EQ(memory[0x1234], 0xCD);
-		EXPECT_EQ(memory[0x1235], 0xAB);
-	}
-
-	TEST_F(MemoryWriteWordTest, ConsumesTwoCycles)
-	{
-		Cycles cycles{ 10 };
-
-		memory.WriteWord(cycles, 0xABCD, 0x1234);
-
-		EXPECT_EQ(cycles, 8u);
-	}
-
-	TEST_F(MemoryWriteWordTest, LeavesTheNeighbouringBytesAlone)
-	{
-		memory[0x1233] = 0x11;
-		memory[0x1236] = 0x22;
-		Cycles cycles{ 10 };
-
-		memory.WriteWord(cycles, 0xABCD, 0x1234);
-
-		EXPECT_EQ(memory[0x1233], 0x11);
-		EXPECT_EQ(memory[0x1236], 0x22);
-	}
-
-	TEST_F(MemoryWriteWordTest, WritesEveryBitOfTheValue)
-	{
-		Cycles cycles{ 10 };
-
-		memory.WriteWord(cycles, 0xFFFF, 0x1234);
-
-		EXPECT_EQ(memory[0x1234], 0xFF);
-		EXPECT_EQ(memory[0x1235], 0xFF);
-	}
-
-	TEST_F(MemoryWriteWordTest, WritesZeroOverExistingBytes)
-	{
-		memory[0x1234] = 0xAA;
-		memory[0x1235] = 0xBB;
-		Cycles cycles{ 10 };
-
-		memory.WriteWord(cycles, 0x0000, 0x1234);
-
-		EXPECT_EQ(memory[0x1234], 0x00);
-		EXPECT_EQ(memory[0x1235], 0x00);
-	}
-
 	TEST_F(CPUMemoryAccessTest, ResetZeroesMemory)
 	{
 		memory[0x0000] = 0x42;
@@ -231,6 +178,59 @@ namespace Test6502 {
 		EXPECT_EQ(cpu.ReadByte(cycles, memory, 0x0000), 0x42);
 		EXPECT_EQ(cpu.ReadByte(cycles, memory, 0xFFFF), 0x37);
 		EXPECT_EQ(cycles, 8u);
+	}
+
+	TEST_F(CPUWriteWordTest, WritesTheLowByteFirst)
+	{
+		Cycles cycles{ 10 };
+
+		cpu.WriteWord(cycles, memory, 0x1234, 0xABCD);
+
+		EXPECT_EQ(memory[0x1234], 0xCD);
+		EXPECT_EQ(memory[0x1235], 0xAB);
+	}
+
+	TEST_F(CPUWriteWordTest, ConsumesTwoCycles)
+	{
+		Cycles cycles{ 10 };
+
+		cpu.WriteWord(cycles, memory, 0x1234, 0xABCD);
+
+		EXPECT_EQ(cycles, 8u);
+	}
+
+	TEST_F(CPUWriteWordTest, LeavesTheNeighbouringBytesAlone)
+	{
+		memory[0x1233] = 0x11;
+		memory[0x1236] = 0x22;
+		Cycles cycles{ 10 };
+
+		cpu.WriteWord(cycles, memory, 0x1234, 0xABCD);
+
+		EXPECT_EQ(memory[0x1233], 0x11);
+		EXPECT_EQ(memory[0x1236], 0x22);
+	}
+
+	TEST_F(CPUWriteWordTest, WritesEveryBitOfTheValue)
+	{
+		Cycles cycles{ 10 };
+
+		cpu.WriteWord(cycles, memory, 0x1234, 0xFFFF);
+
+		EXPECT_EQ(memory[0x1234], 0xFF);
+		EXPECT_EQ(memory[0x1235], 0xFF);
+	}
+
+	TEST_F(CPUWriteWordTest, WritesZeroOverExistingBytes)
+	{
+		memory[0x1234] = 0xAA;
+		memory[0x1235] = 0xBB;
+		Cycles cycles{ 10 };
+
+		cpu.WriteWord(cycles, memory, 0x1234, 0x0000);
+
+		EXPECT_EQ(memory[0x1234], 0x00);
+		EXPECT_EQ(memory[0x1235], 0x00);
 	}
 
 }

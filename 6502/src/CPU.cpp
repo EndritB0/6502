@@ -68,6 +68,13 @@ namespace MOS6502 {
 		cycles--;
 	}
 
+	void CPU::WriteWord(Cycles& cycles, Memory& memory, Address address, Word value)
+	{
+		memory[address] = static_cast<Byte>(value & 0x00FF);
+		memory[static_cast<Address>(address + 1)] = static_cast<Byte>((value & 0xFF00) >> 8);
+		cycles -= 2;
+	}
+
 	Address CPU::AddIndexed(Cycles& cycles, Address address, Byte offset)
 	{
 		Address effectiveAddress{ static_cast<Address>(address + offset) };
@@ -347,9 +354,9 @@ namespace MOS6502 {
 				case Opcode::JSR:
 				{
 					Address subroutineAddress{ FetchWord(cycles, memory) };
-					memory.WriteWord(cycles, static_cast<Word>(ProgramCounter - 1), StackPointer);
-					ProgramCounter = subroutineAddress;
+					WriteWord(cycles, memory, StackPointer, static_cast<Word>(ProgramCounter - 1));
 					StackPointer += 2;
+					ProgramCounter = subroutineAddress;
 					cycles--;
 					break;
 				}

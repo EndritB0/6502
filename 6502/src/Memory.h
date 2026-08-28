@@ -12,7 +12,6 @@ namespace MOS6502 {
 		Byte operator[](Address address) const { return Data[address]; }
 
 		void Init();
-		void WriteWord(Cycles& cycles, Word value, Address address);
 	};
 
 }
