@@ -330,6 +330,21 @@ namespace Test6502 {
 		EXPECT_EQ(memory[0x9000], 0x00);
 	}
 
+	TEST_F(OpcodeSTAIndirectXTest, WrapsThePointerFetchInsideTheZeroPage)
+	{
+		cpu.Accumulator = 0x42;
+		cpu.XRegister = 0x04;
+		WriteProgram({ Opcode::STA_INDIRECT_X, 0xFB });
+		memory[0x00FF] = 0x00;
+		memory[0x0000] = 0x80;
+		memory[0x0100] = 0x90;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(memory[0x8000], 0x42);
+		EXPECT_EQ(memory[0x9000], 0x00);
+	}
+
 	TEST_F(OpcodeSTAIndirectXTest, ConsumesSixCycles)
 	{
 		cpu.Accumulator = 0x42;
@@ -384,6 +399,21 @@ namespace Test6502 {
 
 		EXPECT_EQ(memory[0x8100], 0x42);
 		EXPECT_EQ(memory[0x8000], 0x00);
+	}
+
+	TEST_F(OpcodeSTAIndirectYTest, WrapsThePointerFetchInsideTheZeroPage)
+	{
+		cpu.Accumulator = 0x42;
+		cpu.YRegister = 0x04;
+		WriteProgram({ Opcode::STA_INDIRECT_Y, 0xFF });
+		memory[0x00FF] = 0x00;
+		memory[0x0000] = 0x80;
+		memory[0x0100] = 0x90;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(memory[0x8004], 0x42);
+		EXPECT_EQ(memory[0x9004], 0x00);
 	}
 
 	TEST_F(OpcodeSTAIndirectYTest, ConsumesSixCyclesWhenNoPageIsCrossed)

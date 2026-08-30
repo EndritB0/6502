@@ -451,6 +451,21 @@ namespace Test6502 {
 		EXPECT_EQ(cpu.Accumulator, 0x37);
 	}
 
+	TEST_F(OpcodeLDAIndirectXTest, WrapsThePointerFetchInsideTheZeroPage)
+	{
+		cpu.XRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_X, 0xFB });
+		memory[0x00FF] = 0x00;
+		memory[0x0000] = 0x80;
+		memory[0x8000] = 0x37;
+		memory[0x0100] = 0x90;
+		memory[0x9000] = 0x99;
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
 	TEST_F(OpcodeLDAIndirectXTest, ConsumesSixCycles)
 	{
 		cpu.XRegister = 0x04;
@@ -532,6 +547,21 @@ namespace Test6502 {
 		memory[0x8100] = 0x37;
 
 		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.Accumulator, 0x37);
+	}
+
+	TEST_F(OpcodeLDAIndirectYTest, WrapsThePointerFetchInsideTheZeroPage)
+	{
+		cpu.YRegister = 0x04;
+		WriteProgram({ Opcode::LDA_INDIRECT_Y, 0xFF });
+		memory[0x00FF] = 0x00;
+		memory[0x0000] = 0x80;
+		memory[0x8004] = 0x37;
+		memory[0x0100] = 0x90;
+		memory[0x9004] = 0x99;
+
+		cpu.Execute(5, memory);
 
 		EXPECT_EQ(cpu.Accumulator, 0x37);
 	}

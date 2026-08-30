@@ -16,23 +16,45 @@ namespace Test6502 {
 		EXPECT_EQ(cpu.ProgramCounter, 0x4242);
 	}
 
+	TEST_F(OpcodeJSRTest, ReadsTheSubroutineAddressLittleEndian)
+	{
+		WriteProgram({ Opcode::JSR, 0x34, 0x12 });
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(cpu.ProgramCounter, 0x1234);
+	}
+
 	TEST_F(OpcodeJSRTest, SavesTheAddressOfTheLastInstructionByteLittleEndian)
 	{
 		WriteProgram({ Opcode::JSR, 0x42, 0x42 });
 
 		cpu.Execute(6, memory);
 
-		EXPECT_EQ(memory[InitialStackPointer], 0xFE);
-		EXPECT_EQ(memory[InitialStackPointer + 1], 0xFF);
+		EXPECT_EQ(memory[StackAddress(0xFE)], 0xFE);
+		EXPECT_EQ(memory[StackAddress(0xFF)], 0xFF);
 	}
 
-	TEST_F(OpcodeJSRTest, MovesTheStackPointerPastTheSavedAddress)
+	TEST_F(OpcodeJSRTest, MovesTheStackPointerDownPastTheSavedAddress)
 	{
 		WriteProgram({ Opcode::JSR, 0x42, 0x42 });
 
 		cpu.Execute(6, memory);
 
-		EXPECT_EQ(cpu.StackPointer, InitialStackPointer + 2);
+		EXPECT_EQ(cpu.StackPointer, InitialStackPointer - 2);
+	}
+
+	TEST_F(OpcodeJSRTest, PushesToWhereTheStackPointerIsPointing)
+	{
+		cpu.StackPointer = 0x80;
+		WriteProgram({ Opcode::JSR, 0x42, 0x42 });
+
+		cpu.Execute(6, memory);
+
+		EXPECT_EQ(memory[StackAddress(0x7F)], 0xFE);
+		EXPECT_EQ(memory[StackAddress(0x80)], 0xFF);
+		EXPECT_EQ(memory[StackAddress(0xFF)], 0x00);
+		EXPECT_EQ(cpu.StackPointer, 0x7E);
 	}
 
 	TEST_F(OpcodeJSRTest, LeavesTheRegistersAndFlagsAlone)

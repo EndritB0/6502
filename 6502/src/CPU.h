@@ -44,7 +44,10 @@ namespace MOS6502 {
 		static constexpr Byte STY_ZERO_PAGE_X{ 0x94 };
 		static constexpr Byte STY_ABSOLUTE{ 0x8C };
 
+		static constexpr Byte JMP_ABSOLUTE{ 0x4C };
+		static constexpr Byte JMP_INDIRECT{ 0x6C };
 		static constexpr Byte JSR{ 0x20 };
+		static constexpr Byte RTS{ 0x60 };
 	}
 
 	namespace Flag {
@@ -62,7 +65,7 @@ namespace MOS6502 {
 
 	struct CPU {
 		Word ProgramCounter;
-		Word StackPointer;
+		Byte StackPointer;
 		Byte Accumulator;
 		Byte XRegister;
 		Byte YRegister;
@@ -70,6 +73,7 @@ namespace MOS6502 {
 
 		bool GetFlag(Byte flag) const;
 		void SetFlag(Byte flag, bool value);
+		Address GetStackAddress() const;
 		void LoadRegisterSetStatus(Byte registerValue);
 
 		void Reset(Memory& memory);
@@ -77,9 +81,12 @@ namespace MOS6502 {
 		Word FetchWord(Cycles& cycles, Memory& memory);
 		Byte ReadByte(Cycles& cycles, Memory& memory, Address address);
 		Word ReadWord(Cycles& cycles, Memory& memory, Address address);
+		Word ReadWordPageWrapped(Cycles& cycles, Memory& memory, Address address);
 		void WriteByte(Cycles& cycles, Memory& memory, Address address, Byte value);
 		void WriteWord(Cycles& cycles, Memory& memory, Address address, Word value);
 		Address AddIndexed(Cycles& cycles, Address address, Byte offset);
+		void PushProgramCounterToStack(Cycles& cycles, Memory& memory);
+		Address PopAddressFromStack(Cycles& cycles, Memory& memory);
 		void Execute(Cycles cycles, Memory& memory);
 	};
 

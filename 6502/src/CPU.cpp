@@ -7,7 +7,7 @@ namespace MOS6502 {
 	void CPU::Reset(Memory& memory)
 	{
 		ProgramCounter = 0xFFFC;
-		StackPointer = 0x0100;
+		StackPointer = 0xFF;
 		Accumulator = 0x00;
 		XRegister = 0x00;
 		YRegister = 0x00;
@@ -24,6 +24,11 @@ namespace MOS6502 {
 	{
 		const int updated{ value ? (ProcessorStatus | flag) : (ProcessorStatus & ~flag) };
 		ProcessorStatus = static_cast<Byte>(updated);
+	}
+
+	Address CPU::GetStackAddress() const
+	{
+		return static_cast<Address>(0x0100 | StackPointer);
 	}
 
 	void CPU::LoadRegisterSetStatus(Byte registerValue)
@@ -62,6 +67,14 @@ namespace MOS6502 {
 		return word;
 	}
 
+	Word CPU::ReadWordPageWrapped(Cycles& cycles, Memory& memory, Address address)
+	{
+		const Address highByteAddress{ static_cast<Address>((address & 0xFF00) | ((address + 1) & 0x00FF)) };
+		Word word{ static_cast<Word>(memory[address] | (memory[highByteAddress] << 8)) };
+		cycles -= 2;
+		return word;
+	}
+
 	void CPU::WriteByte(Cycles& cycles, Memory& memory, Address address, Byte value)
 	{
 		memory[address] = value;
@@ -83,6 +96,20 @@ namespace MOS6502 {
 			cycles--;
 		}
 		return effectiveAddress;
+	}
+
+	void CPU::PushProgramCounterToStack(Cycles& cycles, Memory& memory)
+	{
+		WriteWord(cycles, memory, GetStackAddress() - 1, ProgramCounter - 1);
+		StackPointer -= 2;
+	}
+
+	Address CPU::PopAddressFromStack(Cycles& cycles, Memory& memory)
+	{
+		Address address{ ReadWord(cycles, memory, GetStackAddress() + 1) };
+		StackPointer += 2;
+		cycles--;
+		return address;
 	}
 
 	void CPU::Execute(Cycles cycles, Memory& memory)
@@ -148,7 +175,7 @@ namespace MOS6502 {
 				{
 					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
 					cycles--;
-					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Address effectiveAddress{ ReadWordPageWrapped(cycles, memory, zeroPageAddress) };
 					Accumulator = ReadByte(cycles, memory, effectiveAddress);
 					LoadRegisterSetStatus(Accumulator);
 					break;
@@ -157,7 +184,7 @@ namespace MOS6502 {
 				case Opcode::LDA_INDIRECT_Y:
 				{
 					Byte zeroPageAddress{ FetchByte(cycles, memory) };
-					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Address effectiveAddress{ ReadWordPageWrapped(cycles, memory, zeroPageAddress) };
 					Address finalAddress{ AddIndexed(cycles, effectiveAddress, YRegister) };
 					Accumulator = ReadByte(cycles, memory, finalAddress);
 					LoadRegisterSetStatus(Accumulator);
@@ -292,7 +319,7 @@ namespace MOS6502 {
 				{
 					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
 					cycles--;
-					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Address effectiveAddress{ ReadWordPageWrapped(cycles, memory, zeroPageAddress) };
 					WriteByte(cycles, memory, effectiveAddress, Accumulator);
 					break;
 				}
@@ -300,7 +327,7 @@ namespace MOS6502 {
 				case Opcode::STA_INDIRECT_Y:
 				{
 					Byte zeroPageAddress{ FetchByte(cycles, memory) };
-					Address effectiveAddress{ ReadWord(cycles, memory, zeroPageAddress) };
+					Address effectiveAddress{ ReadWordPageWrapped(cycles, memory, zeroPageAddress) };
 					Address finalAddress{ static_cast<Address>(effectiveAddress + YRegister) };
 					cycles--;
 					WriteByte(cycles, memory, finalAddress, Accumulator);
@@ -351,13 +378,34 @@ namespace MOS6502 {
 					break;
 				}
 
+				case Opcode::JMP_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					ProgramCounter = absoluteAddress;
+					break;
+				}
+
+				case Opcode::JMP_INDIRECT:
+				{
+					Address indirectAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ ReadWordPageWrapped(cycles, memory, indirectAddress) };
+					ProgramCounter = effectiveAddress;
+					break;
+				}
+
 				case Opcode::JSR:
 				{
 					Address subroutineAddress{ FetchWord(cycles, memory) };
-					WriteWord(cycles, memory, StackPointer, static_cast<Word>(ProgramCounter - 1));
-					StackPointer += 2;
+					PushProgramCounterToStack(cycles, memory);
 					ProgramCounter = subroutineAddress;
 					cycles--;
+					break;
+				}
+
+				case Opcode::RTS:
+				{
+					ProgramCounter = PopAddressFromStack(cycles, memory) + 1;
+					cycles -= 2;
 					break;
 				}
 

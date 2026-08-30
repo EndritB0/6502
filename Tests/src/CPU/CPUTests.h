@@ -18,8 +18,14 @@ namespace Test6502 {
 	namespace Opcode = MOS6502::Opcode;
 
 	constexpr Address ResetVector{ 0xFFFC };
-	constexpr Word InitialStackPointer{ 0x0100 };
+	constexpr Address StackPage{ 0x0100 };
+	constexpr Byte InitialStackPointer{ 0xFF };
 	constexpr Byte UnrelatedFlags{ Flag::Carry | Flag::InterruptDisable | Flag::Decimal | Flag::Overflow };
+
+	constexpr Address StackAddress(Byte stackPointer)
+	{
+		return static_cast<Address>(StackPage + stackPointer);
+	}
 
 	class CPUTest : public ::testing::Test {
 	protected:
