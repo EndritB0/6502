@@ -21,6 +21,8 @@ set(TESTS_SOURCES
     "src/CPU/DavePoo Tests/DavePooTests.h"
     "src/CPU/DavePoo Tests/LoadRegisterTests.cpp"
     "src/CPU/DavePoo Tests/StoreRegisterTests.cpp"
+    "src/CPU/DavePoo Tests/StackOperationsTests.cpp"
+    "src/CPU/DavePoo Tests/JumpsAndCallsTests.cpp"
     "src/MemoryTests.cpp"
 )
 
