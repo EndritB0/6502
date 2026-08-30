@@ -98,10 +98,23 @@ namespace MOS6502 {
 		return effectiveAddress;
 	}
 
+	void CPU::PushByteToStack(Cycles& cycles, Memory& memory, Byte value)
+	{
+		WriteByte(cycles, memory, GetStackAddress(), value);
+		StackPointer--;
+	}
+
 	void CPU::PushProgramCounterToStack(Cycles& cycles, Memory& memory)
 	{
 		WriteWord(cycles, memory, GetStackAddress() - 1, ProgramCounter - 1);
 		StackPointer -= 2;
+	}
+
+	Byte CPU::PopByteFromStack(Cycles& cycles, Memory& memory)
+	{
+		StackPointer++;
+		cycles--;
+		return ReadByte(cycles, memory, GetStackAddress());
 	}
 
 	Address CPU::PopAddressFromStack(Cycles& cycles, Memory& memory)
@@ -375,6 +388,50 @@ namespace MOS6502 {
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
 					WriteByte(cycles, memory, absoluteAddress, YRegister);
+					break;
+				}
+
+				case Opcode::TSX:
+				{
+					XRegister = StackPointer;
+					cycles--;
+					LoadRegisterSetStatus(XRegister);
+					break;
+				}
+
+				case Opcode::TXS:
+				{
+					StackPointer = XRegister;
+					cycles--;
+					break;
+				}
+
+				case Opcode::PHA:
+				{
+					PushByteToStack(cycles, memory, Accumulator);
+					cycles--;
+					break;
+				}
+
+				case Opcode::PHP:
+				{
+					PushByteToStack(cycles, memory, ProcessorStatus | Flag::Break | Flag::Unused);
+					cycles--;
+					break;
+				}
+
+				case Opcode::PLA:
+				{
+					Accumulator = PopByteFromStack(cycles, memory);
+					cycles--;
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::PLP:
+				{
+					ProcessorStatus = static_cast<Byte>(PopByteFromStack(cycles, memory) & ~(Flag::Break | Flag::Unused));
+					cycles--;
 					break;
 				}
 

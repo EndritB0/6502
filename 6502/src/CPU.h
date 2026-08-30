@@ -44,6 +44,13 @@ namespace MOS6502 {
 		static constexpr Byte STY_ZERO_PAGE_X{ 0x94 };
 		static constexpr Byte STY_ABSOLUTE{ 0x8C };
 
+		static constexpr Byte TSX{ 0xBA };
+		static constexpr Byte TXS{ 0x9A };
+		static constexpr Byte PHA{ 0x48 };
+		static constexpr Byte PHP{ 0x08 };
+		static constexpr Byte PLA{ 0x68 };
+		static constexpr Byte PLP{ 0x28 };
+
 		static constexpr Byte JMP_ABSOLUTE{ 0x4C };
 		static constexpr Byte JMP_INDIRECT{ 0x6C };
 		static constexpr Byte JSR{ 0x20 };
@@ -85,7 +92,9 @@ namespace MOS6502 {
 		void WriteByte(Cycles& cycles, Memory& memory, Address address, Byte value);
 		void WriteWord(Cycles& cycles, Memory& memory, Address address, Word value);
 		Address AddIndexed(Cycles& cycles, Address address, Byte offset);
+		void PushByteToStack(Cycles& cycles, Memory& memory, Byte value);
 		void PushProgramCounterToStack(Cycles& cycles, Memory& memory);
+		Byte PopByteFromStack(Cycles& cycles, Memory& memory);
 		Address PopAddressFromStack(Cycles& cycles, Memory& memory);
 		void Execute(Cycles cycles, Memory& memory);
 	};
