@@ -53,6 +53,15 @@ namespace MOS6502 {
 		static constexpr Byte AND_INDIRECT_X{ 0x21 };
 		static constexpr Byte AND_INDIRECT_Y{ 0x31 };
 
+		static constexpr Byte EOR_IMMEDIATE{ 0x49 };
+		static constexpr Byte EOR_ZERO_PAGE{ 0x45 };
+		static constexpr Byte EOR_ZERO_PAGE_X{ 0x55 };
+		static constexpr Byte EOR_ABSOLUTE{ 0x4D };
+		static constexpr Byte EOR_ABSOLUTE_X{ 0x5D };
+		static constexpr Byte EOR_ABSOLUTE_Y{ 0x59 };
+		static constexpr Byte EOR_INDIRECT_X{ 0x41 };
+		static constexpr Byte EOR_INDIRECT_Y{ 0x51 };
+
 		static constexpr Byte TSX{ 0xBA };
 		static constexpr Byte TXS{ 0x9A };
 		static constexpr Byte PHA{ 0x48 };

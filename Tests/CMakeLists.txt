@@ -10,6 +10,7 @@ set(TESTS_SOURCES
     "src/CPU/STXTest.cpp"
     "src/CPU/STYTest.cpp"
     "src/CPU/ANDTest.cpp"
+    "src/CPU/EORTest.cpp"
     "src/CPU/TSXTest.cpp"
     "src/CPU/TXSTest.cpp"
     "src/CPU/PHATest.cpp"
