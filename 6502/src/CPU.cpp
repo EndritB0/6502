@@ -391,6 +391,76 @@ namespace MOS6502 {
 					break;
 				}
 
+				case Opcode::AND_IMMEDIATE:
+				{
+					Accumulator &= FetchByte(cycles, memory);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::AND_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					Accumulator &= ReadByte(cycles, memory, zeroPageAddress);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::AND_ZERO_PAGE_X:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
+					cycles--;
+					Accumulator &= ReadByte(cycles, memory, zeroPageAddress);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::AND_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Accumulator &= ReadByte(cycles, memory, absoluteAddress);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::AND_ABSOLUTE_X:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ AddIndexed(cycles, absoluteAddress, XRegister) };
+					Accumulator &= ReadByte(cycles, memory, effectiveAddress);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::AND_ABSOLUTE_Y:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ AddIndexed(cycles, absoluteAddress, YRegister) };
+					Accumulator &= ReadByte(cycles, memory, effectiveAddress);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::AND_INDIRECT_X:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
+					cycles--;
+					Address effectiveAddress{ ReadWordPageWrapped(cycles, memory, zeroPageAddress) };
+					Accumulator &= ReadByte(cycles, memory, effectiveAddress);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::AND_INDIRECT_Y:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					Address effectiveAddress{ ReadWordPageWrapped(cycles, memory, zeroPageAddress) };
+					Address finalAddress{ AddIndexed(cycles, effectiveAddress, YRegister) };
+					Accumulator &= ReadByte(cycles, memory, finalAddress);
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
 				case Opcode::TSX:
 				{
 					XRegister = StackPointer;
