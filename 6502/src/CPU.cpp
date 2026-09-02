@@ -601,6 +601,26 @@ namespace MOS6502 {
 					break;
 				}
 
+				case Opcode::BIT_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					Byte value{ ReadByte(cycles, memory, zeroPageAddress) };
+					SetFlag(Flag::Zero, (Accumulator & value) == 0);
+					SetFlag(Flag::Negative, (value & 0x80) != 0);
+					SetFlag(Flag::Overflow, (value & 0x40) != 0);
+					break;
+				}
+
+				case Opcode::BIT_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Byte value{ ReadByte(cycles, memory, absoluteAddress) };
+					SetFlag(Flag::Zero, (Accumulator & value) == 0);
+					SetFlag(Flag::Negative, (value & 0x80) != 0);
+					SetFlag(Flag::Overflow, (value & 0x40) != 0);
+					break;
+				}
+
 				case Opcode::TSX:
 				{
 					XRegister = StackPointer;

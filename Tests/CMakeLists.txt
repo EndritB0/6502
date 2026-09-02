@@ -12,6 +12,7 @@ set(TESTS_SOURCES
     "src/CPU/ANDTest.cpp"
     "src/CPU/EORTest.cpp"
     "src/CPU/ORATest.cpp"
+    "src/CPU/BITTest.cpp"
     "src/CPU/TSXTest.cpp"
     "src/CPU/TXSTest.cpp"
     "src/CPU/PHATest.cpp"

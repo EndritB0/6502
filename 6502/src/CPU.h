@@ -71,6 +71,9 @@ namespace MOS6502 {
 		static constexpr Byte ORA_INDIRECT_X{ 0x01 };
 		static constexpr Byte ORA_INDIRECT_Y{ 0x11 };
 
+		static constexpr Byte BIT_ZERO_PAGE{ 0x24 };
+		static constexpr Byte BIT_ABSOLUTE{ 0x2C };
+
 		static constexpr Byte TSX{ 0xBA };
 		static constexpr Byte TXS{ 0x9A };
 		static constexpr Byte PHA{ 0x48 };
