@@ -37,6 +37,21 @@ namespace MOS6502 {
 		SetFlag(Flag::Negative, (registerValue & 0x80) != 0);
 	}
 
+	void CPU::LoadProgram(Memory& memory, Byte* program, std::uint32_t programSize)
+	{
+		if (!program || programSize < 2)
+		{
+			return;
+		}
+
+		std::uint32_t at{ 2 };
+		const Address loadAddress{ static_cast<Address>(program[0] | (program[1] << 8)) };
+		for (Address i{ loadAddress }; i < loadAddress + programSize - 2; i++)
+		{
+			memory[i] = program[at++];
+		}
+	}
+
 	Byte CPU::FetchByte(Cycles& cycles, Memory& memory)
 	{
 		Byte byte{ memory[ProgramCounter] };

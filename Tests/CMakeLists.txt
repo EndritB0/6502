@@ -22,12 +22,14 @@ set(TESTS_SOURCES
     "src/CPU/JMPTest.cpp"
     "src/CPU/JSRTest.cpp"
     "src/CPU/RTSTest.cpp"
+    "src/CPU/LoadProgramTest.cpp"
     "src/CPU/DavePoo Tests/DavePooTests.h"
     "src/CPU/DavePoo Tests/LoadRegisterTests.cpp"
     "src/CPU/DavePoo Tests/StoreRegisterTests.cpp"
     "src/CPU/DavePoo Tests/StackOperationsTests.cpp"
     "src/CPU/DavePoo Tests/JumpsAndCallsTests.cpp"
     "src/CPU/DavePoo Tests/AND_EOR_ORATests.cpp"
+    "src/CPU/DavePoo Tests/LoadProgramTests.cpp"
     "src/MemoryTests.cpp"
 )
 

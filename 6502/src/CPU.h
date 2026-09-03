@@ -112,6 +112,7 @@ namespace MOS6502 {
 		void SetFlag(Byte flag, bool value);
 		Address GetStackAddress() const;
 		void LoadRegisterSetStatus(Byte registerValue);
+		void LoadProgram(Memory& memory, Byte* program, std::uint32_t programSize);
 
 		void Reset(Memory& memory);
 		Byte FetchByte(Cycles& cycles, Memory& memory);
