@@ -44,6 +44,11 @@ namespace MOS6502 {
 		static constexpr Byte STY_ZERO_PAGE_X{ 0x94 };
 		static constexpr Byte STY_ABSOLUTE{ 0x8C };
 
+		static constexpr Byte TAX{ 0xAA };
+		static constexpr Byte TAY{ 0xA8 };
+		static constexpr Byte TXA{ 0x8A };
+		static constexpr Byte TYA{ 0x98 };
+
 		static constexpr Byte AND_IMMEDIATE{ 0x29 };
 		static constexpr Byte AND_ZERO_PAGE{ 0x25 };
 		static constexpr Byte AND_ZERO_PAGE_X{ 0x35 };

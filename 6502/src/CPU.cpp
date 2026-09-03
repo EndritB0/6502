@@ -406,6 +406,38 @@ namespace MOS6502 {
 					break;
 				}
 
+				case Opcode::TAX:
+				{
+					XRegister = Accumulator;
+					cycles--;
+					LoadRegisterSetStatus(XRegister);
+					break;
+				}
+
+				case Opcode::TAY:
+				{
+					YRegister = Accumulator;
+					cycles--;
+					LoadRegisterSetStatus(YRegister);
+					break;
+				}
+
+				case Opcode::TXA:
+				{
+					Accumulator = XRegister;
+					cycles--;
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
+				case Opcode::TYA:
+				{
+					Accumulator = YRegister;
+					cycles--;
+					LoadRegisterSetStatus(Accumulator);
+					break;
+				}
+
 				case Opcode::AND_IMMEDIATE:
 				{
 					Accumulator &= FetchByte(cycles, memory);
