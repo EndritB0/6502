@@ -606,8 +606,8 @@ namespace MOS6502 {
 					Byte zeroPageAddress{ FetchByte(cycles, memory) };
 					Byte value{ ReadByte(cycles, memory, zeroPageAddress) };
 					SetFlag(Flag::Zero, (Accumulator & value) == 0);
-					SetFlag(Flag::Negative, (value & 0x80) != 0);
-					SetFlag(Flag::Overflow, (value & 0x40) != 0);
+					SetFlag(Flag::Negative, (value & Flag::Negative) != 0);
+					SetFlag(Flag::Overflow, (value & Flag::Overflow) != 0);
 					break;
 				}
 
@@ -616,8 +616,8 @@ namespace MOS6502 {
 					Address absoluteAddress{ FetchWord(cycles, memory) };
 					Byte value{ ReadByte(cycles, memory, absoluteAddress) };
 					SetFlag(Flag::Zero, (Accumulator & value) == 0);
-					SetFlag(Flag::Negative, (value & 0x80) != 0);
-					SetFlag(Flag::Overflow, (value & 0x40) != 0);
+					SetFlag(Flag::Negative, (value & Flag::Negative) != 0);
+					SetFlag(Flag::Overflow, (value & Flag::Overflow) != 0);
 					break;
 				}
 
