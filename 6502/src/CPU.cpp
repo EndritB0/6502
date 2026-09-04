@@ -701,7 +701,7 @@ namespace MOS6502 {
 				case Opcode::INC_ABSOLUTE_X:
 				{
 					Address absoluteAddress{ FetchWord(cycles, memory) };
-					Address effectiveAddress{ AddIndexed(cycles, absoluteAddress, XRegister) };
+					Address effectiveAddress{ static_cast<Address>(absoluteAddress + XRegister) };
 					Byte value{ ReadByte(cycles, memory, effectiveAddress) + 1u };
 					cycles -= 2;
 					WriteByte(cycles, memory, effectiveAddress, value);
@@ -720,6 +720,63 @@ namespace MOS6502 {
 				case Opcode::INY:
 				{
 					YRegister++;
+					cycles--;
+					LoadRegisterSetStatus(YRegister);
+					break;
+				}
+
+				case Opcode::DEC_ZERO_PAGE:
+				{
+					Byte zeroPageAddress{ FetchByte(cycles, memory) };
+					Byte value{ ReadByte(cycles, memory, zeroPageAddress) - 1u };
+					cycles--;
+					WriteByte(cycles, memory, zeroPageAddress, value);
+					LoadRegisterSetStatus(value);
+					break;
+				}
+
+				case Opcode::DEC_ZERO_PAGE_X:
+				{
+					Byte zeroPageAddress{ static_cast<Byte>(FetchByte(cycles, memory) + XRegister) };
+					Byte value{ ReadByte(cycles, memory, zeroPageAddress) - 1u };
+					cycles -= 2;
+					WriteByte(cycles, memory, zeroPageAddress, value);
+					LoadRegisterSetStatus(value);
+					break;
+				}
+
+				case Opcode::DEC_ABSOLUTE:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Byte value{ ReadByte(cycles, memory, absoluteAddress) - 1u };
+					cycles--;
+					WriteByte(cycles, memory, absoluteAddress, value);
+					LoadRegisterSetStatus(value);
+					break;
+				}
+
+				case Opcode::DEC_ABSOLUTE_X:
+				{
+					Address absoluteAddress{ FetchWord(cycles, memory) };
+					Address effectiveAddress{ static_cast<Address>(absoluteAddress + XRegister) };
+					Byte value{ ReadByte(cycles, memory, effectiveAddress) - 1u };
+					cycles -= 2;
+					WriteByte(cycles, memory, effectiveAddress, value);
+					LoadRegisterSetStatus(value);
+					break;
+				}
+
+				case Opcode::DEX:
+				{
+					XRegister--;
+					cycles--;
+					LoadRegisterSetStatus(XRegister);
+					break;
+				}
+
+				case Opcode::DEY:
+				{
+					YRegister--;
 					cycles--;
 					LoadRegisterSetStatus(YRegister);
 					break;

@@ -308,6 +308,18 @@ namespace Test6502 {
 		EXPECT_EQ(cpu.ProgramCounter, ResetVector + 3);
 	}
 
+	TEST_F(OpcodeINCAbsoluteXTest, ConsumesNoMoreThanSevenCyclesWhenAPageIsCrossed)
+	{
+		cpu.XRegister = 0xFF;
+		WriteProgram({ Opcode::INC_ABSOLUTE_X, 0x02, 0x44, Opcode::LDA_IMMEDIATE, 0x99 });
+		memory[0x4501] = 0x41;
+
+		cpu.Execute(8, memory);
+
+		EXPECT_EQ(memory[0x4501], 0x42);
+		EXPECT_EQ(cpu.Accumulator, 0x99);
+	}
+
 	TEST_F(OpcodeINCAbsoluteXTest, WrapsFromTwoFiftyFiveBackToZero)
 	{
 		cpu.XRegister = 0x05;

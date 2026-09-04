@@ -86,6 +86,13 @@ namespace MOS6502 {
 		static constexpr Byte INX{ 0xE8 };
 		static constexpr Byte INY{ 0xC8 };
 
+		static constexpr Byte DEC_ZERO_PAGE{ 0xC6 };
+		static constexpr Byte DEC_ZERO_PAGE_X{ 0xD6 };
+		static constexpr Byte DEC_ABSOLUTE{ 0xCE };
+		static constexpr Byte DEC_ABSOLUTE_X{ 0xDE };
+		static constexpr Byte DEX{ 0xCA };
+		static constexpr Byte DEY{ 0x88 };
+
 		static constexpr Byte TSX{ 0xBA };
 		static constexpr Byte TXS{ 0x9A };
 		static constexpr Byte PHA{ 0x48 };

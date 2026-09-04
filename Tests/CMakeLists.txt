@@ -20,6 +20,9 @@ set(TESTS_SOURCES
     "src/CPU/INCTest.cpp"
     "src/CPU/INXTest.cpp"
     "src/CPU/INYTest.cpp"
+    "src/CPU/DECTest.cpp"
+    "src/CPU/DEXTest.cpp"
+    "src/CPU/DEYTest.cpp"
     "src/CPU/TSXTest.cpp"
     "src/CPU/TXSTest.cpp"
     "src/CPU/PHATest.cpp"
@@ -38,6 +41,7 @@ set(TESTS_SOURCES
     "src/CPU/DavePoo Tests/JumpsAndCallsTests.cpp"
     "src/CPU/DavePoo Tests/AND_EOR_ORATests.cpp"
     "src/CPU/DavePoo Tests/LoadProgramTests.cpp"
+    "src/CPU/DavePoo Tests/IncrementDecrementTests.cpp"
     "src/MemoryTests.cpp"
 )
 
