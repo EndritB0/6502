@@ -32,6 +32,14 @@ set(TESTS_SOURCES
     "src/CPU/JMPTest.cpp"
     "src/CPU/JSRTest.cpp"
     "src/CPU/RTSTest.cpp"
+    "src/CPU/BCCTest.cpp"
+    "src/CPU/BCSTest.cpp"
+    "src/CPU/BEQTest.cpp"
+    "src/CPU/BMITest.cpp"
+    "src/CPU/BNETest.cpp"
+    "src/CPU/BPLTest.cpp"
+    "src/CPU/BVCTest.cpp"
+    "src/CPU/BVSTest.cpp"
     "src/CPU/LoadProgramTest.cpp"
     "src/CPU/DavePoo Tests/DavePooTests.h"
     "src/CPU/DavePoo Tests/LoadRegisterTests.cpp"
@@ -42,6 +50,7 @@ set(TESTS_SOURCES
     "src/CPU/DavePoo Tests/AND_EOR_ORATests.cpp"
     "src/CPU/DavePoo Tests/LoadProgramTests.cpp"
     "src/CPU/DavePoo Tests/IncrementDecrementTests.cpp"
+    "src/CPU/DavePoo Tests/BranchTests.cpp"
     "src/MemoryTests.cpp"
 )
 

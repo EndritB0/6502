@@ -104,6 +104,15 @@ namespace MOS6502 {
 		static constexpr Byte JMP_INDIRECT{ 0x6C };
 		static constexpr Byte JSR{ 0x20 };
 		static constexpr Byte RTS{ 0x60 };
+
+		static constexpr Byte BCC{ 0x90 };
+		static constexpr Byte BCS{ 0xB0 };
+		static constexpr Byte BEQ{ 0xF0 };
+		static constexpr Byte BMI{ 0x30 };
+		static constexpr Byte BNE{ 0xD0 };
+		static constexpr Byte BPL{ 0x10 };
+		static constexpr Byte BVC{ 0x50 };
+		static constexpr Byte BVS{ 0x70 };
 	}
 
 	namespace Flag {
@@ -146,6 +155,7 @@ namespace MOS6502 {
 		void PushProgramCounterToStack(Cycles& cycles, Memory& memory);
 		Byte PopByteFromStack(Cycles& cycles, Memory& memory);
 		Address PopAddressFromStack(Cycles& cycles, Memory& memory);
+		void BranchIf(Cycles& cycles, Memory& memory, Byte flag, bool expected);
 		void Execute(Cycles cycles, Memory& memory);
 	};
 

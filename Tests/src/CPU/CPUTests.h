@@ -48,4 +48,21 @@ namespace Test6502 {
 		Memory memory;
 	};
 
+
+	class BranchTest : public CPUTest {
+	protected:
+		void WriteProgramAt(Address start, std::initializer_list<Byte> bytes)
+		{
+			cpu.ProgramCounter = start;
+			Address address{ start };
+			for (const Byte byte : bytes)
+			{
+				memory[address] = byte;
+				address++;
+			}
+		}
+
+		static constexpr Address ProgramStart{ 0x4080 };
+	};
+
 }

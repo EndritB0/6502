@@ -140,6 +140,22 @@ namespace MOS6502 {
 		return address;
 	}
 
+	void CPU::BranchIf(Cycles& cycles, Memory& memory, Byte flag, bool expected)
+	{
+		const Byte offset{ FetchByte(cycles, memory) };
+		if (GetFlag(flag) == expected)
+		{
+			const Address target{ static_cast<Address>(ProgramCounter + static_cast<SignedByte>(offset)) };
+			if ((ProgramCounter & 0xFF00) != (target & 0xFF00))
+			{
+				cycles--;
+			}
+
+			ProgramCounter = target;
+			cycles--;
+		}
+	}
+
 	void CPU::Execute(Cycles cycles, Memory& memory)
 	{
 		while (cycles > 0)
@@ -854,6 +870,54 @@ namespace MOS6502 {
 				{
 					ProgramCounter = PopAddressFromStack(cycles, memory) + 1;
 					cycles -= 2;
+					break;
+				}
+
+				case Opcode::BCC:
+				{
+					BranchIf(cycles, memory, Flag::Carry, false);
+					break;
+				}
+
+				case Opcode::BCS:
+				{
+					BranchIf(cycles, memory, Flag::Carry, true);
+					break;
+				}
+
+				case Opcode::BEQ:
+				{
+					BranchIf(cycles, memory, Flag::Zero, true);
+					break;
+				}
+
+				case Opcode::BMI:
+				{
+					BranchIf(cycles, memory, Flag::Negative, true);
+					break;
+				}
+
+				case Opcode::BNE:
+				{
+					BranchIf(cycles, memory, Flag::Zero, false);
+					break;
+				}
+
+				case Opcode::BPL:
+				{
+					BranchIf(cycles, memory, Flag::Negative, false);
+					break;
+				}
+
+				case Opcode::BVC:
+				{
+					BranchIf(cycles, memory, Flag::Overflow, false);
+					break;
+				}
+
+				case Opcode::BVS:
+				{
+					BranchIf(cycles, memory, Flag::Overflow, true);
 					break;
 				}
 
